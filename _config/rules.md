@@ -43,6 +43,38 @@ All rules defined here are **authoritative**. Stage folders MUST reference these
 - If a stage exceeds reasonable bounds: log in `state.md`, reduce scope, retry once.
 - If retry fails: halt with `failure_report.md`.
 
+## Context Overflow Recovery Protocol
+
+When an LLM agent detects or recovers from a context window overflow:
+
+### Immediate Actions
+1. **Stop all work** — Do not attempt to continue in overflowed context
+2. **Commit all state** — Ensure `state.md`, `discovery.md`, `specification.md` etc. are committed
+3. **Log the overflow** — Add entry to project's `CHANGELOG.md`:
+   ```
+   ## [Context Overflow] — {timestamp}
+   - Session: {session-id}
+   - Work lost: {what was being done}
+   - Recovery method: {how it was recovered}
+   ```
+
+### Recovery Procedure
+1. Check `git log --oneline -10` for recent commits
+2. Read the latest `state.md` for the current stage
+3. Read the stage's `CONTEXT.md` to understand expected work
+4. Resume from the last committed state
+
+### Prevention Strategies
+1. **Small commits**: Commit after every logical unit of work (not just at stage end)
+2. **State files**: Write progress to `state.md` files, not just conversation
+3. **Atomic operations**: Don't read multiple large files in one response
+4. **Checksum verification**: After overflow, verify file integrity with `git diff`
+
+### Agent Guidelines
+- If a response feels "long" or you're reading many files, pause and commit
+- Before starting new work, run `git log --oneline -5` to confirm state
+- If you cannot recover context from git + state files, halt and request human intervention
+
 ## Validation Rules
 
 ### Handoff Validation
@@ -67,6 +99,7 @@ These anchors are referenced by stage CONTEXT.md files (format: `filename#headin
 |--------|---------|---------|
 | `rules.md#content-rules` | Content clarity/scope/versioning | All stages |
 | `rules.md#error-handling` | Failure, timeout, retry protocols | All stages |
+| `rules.md#context-overflow-recovery` | Overflow detection, recovery, prevention | All stages |
 | `rules.md#validation-rules` | Handoff and self-check validation | All stages |
 | `formatting.md#output-structure` | Output file structure | 02_compile, 03_format |
 | `formatting.md#frontmatter` | Required frontmatter fields | All stages |
