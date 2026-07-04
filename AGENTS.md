@@ -32,6 +32,84 @@ When stuck or encountering errors:
 4. **If still stuck**: Output a `failure_report.md` in the current stage folder and halt. Await human.
 5. **Never** silently skip stages or fabricate outputs.
 
+### Context Overflow Recovery Checklist
+
+When context overflow is detected (agent stops, errors, or context feels lost):
+
+- [ ] All state files committed to git before resuming
+- [ ] `git log --oneline -10` reviewed for recent work
+- [ ] Latest `state.md` for current stage read
+- [ ] Stage `CONTEXT.md` reviewed for expected deliverables
+- [ ] Resumed from last committed state
+- [ ] Logged overflow in `CHANGELOG.md`
+
+### Memory Consolidation Protocol
+
+Uses git commits as natural "sleep cycles" to consolidate context, mirroring how the brain consolidates memories during sleep.
+
+#### Active Context (Working Memory)
+
+**File**: `session-summary.md` (created automatically at first commit)
+
+**Content**:
+- Current session ID
+- Last committed state
+- What was accomplished (bullet points)
+- Key decisions (table)
+- Blockers (list)
+- Next steps (actionable)
+- Git history (last 10 commits)
+
+**When to Read**: At session start (replaces recovering from conversation history)
+**When to Update**: Before context reaches 70% capacity
+
+#### Consolidation (Sleep Cycle)
+
+**Trigger**: Successful git commit of completed work
+
+**Actions**:
+1. Run `git log --oneline -5`
+2. Append summary to `session-summary.md`:
+   ```
+   ## Session N — {timestamp}
+   **Stage**: {stage name}
+   **Status**: {completed/in-progress}
+   **What was done**: {bullet points}
+   **Key decisions**: {table}
+   **Blockers**: {list}
+   **For next stage**: {actionable}
+   ```
+3. If `session-summary.md` exceeds 500 lines:
+   - Move oldest content to `archive/2026-07-04-session-N.md`
+   - Keep only last 3 sessions in active file
+4. Commit changes
+
+**Frequency**: Every 5-10 git commits (or when context feels "heavy")
+
+#### Archive (Long-Term Memory)
+
+**Location**: `{project-root}/archive/`
+
+**When to Load**: ONLY when:
+- User explicitly requests archived information
+- A trigger term is mentioned (e.g., "show me the archive", "recall session 1")
+- Current context cannot resolve a question
+
+**Do NOT Load**:
+- Completed work that's no longer relevant
+- Information already in current session-summary.md
+- Work that's been superseded by newer commits
+
+#### Retrieval (Cue-Triggered Recall)
+
+**Trigger Terms**: "Show me the archive", "Recall session {N}", "What was done in {stage}?"
+
+**Archive Index** (required for projects with >3 sessions):
+- **File**: `{project-root}/archive/index.md`
+- **Purpose**: Auto-generated table of contents enabling O(1) keyword search
+- **Update**: After any archive operation (new session archived, session updated, session removed)
+- **Example query**: User says "What authentication method was decided?" → Agent reads index.md, finds keyword, loads specific session file
+
 ## Evolution Protocol
 
 When a real project exposes gaps in this template:
@@ -83,4 +161,9 @@ Stage files:
   _stages/02_compile/state.md        — Compile execution log
   _stages/03_format/CONTEXT.md       — Format stage contract
   _stages/03_format/state.md         — Format execution log
+
+Memory consolidation files (created automatically in child projects):
+  {project-root}/session-summary.md  — Active working memory (always loaded)
+  {project-root}/archive/            — Long-term archive directory
+  {project-root}/archive/index.md    — Archive index (required for >3 sessions)
 ```
