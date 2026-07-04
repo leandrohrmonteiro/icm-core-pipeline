@@ -44,13 +44,60 @@ Before submitting, verify:
 - [ ] You have evidence: real project data, execution logs, comparison results
 - [ ] The proposal includes a concrete diff or example
 
-### Step 3: Submit
+### Step 3: Submit (PR Procedure)
 
-Create a pull request to the parent ICM repository with:
+Follow these exact steps to submit your proposal via pull request. This procedure is **required for all child projects**.
 
-1. The proposal file (`icm-contribution-proposal.md`)
-2. The proposed diff (actual file changes)
-3. Evidence from your project execution (logs, state.md entries, before/after comparisons)
+#### 3.1: Prepare the PR branch in the ICM repository
+
+```bash
+# In the ICM core pipeline repo (parent)
+git checkout main
+git pull origin main
+git checkout -b prop/PROP-{YYYY}-{NNN}-and-{NNN}
+```
+
+#### 3.2: Copy proposal files to the ICM repo
+
+```bash
+# From your child project root:
+cp icm-contribution-proposal.md <ICM-repo-root>/proposals/pending/PROP-{YYYY}-{NNN}.md
+cp icm-contribution-proposal-memory-consolidation.md <ICM-repo-root>/proposals/pending/PROP-{YYYY}-{NNN}.md
+```
+
+#### 3.3: Apply the proposed changes to the ICM repo
+
+The PR must contain **both** the proposal docs AND the actual implementation changes:
+
+- Copy the exact code from your proposal's "Diff Preview" section
+- Apply those changes to the corresponding files in the ICM repo
+- Commit with a descriptive message referencing the proposal IDs
+
+#### 3.4: Commit and push
+
+```bash
+git add -A
+git commit -m "feat: merge PROP-{YYYY}-{NNN} ({title}) and PROP-{YYYY}-{NNN} ({title})\n\nAdds: [bullet list of what's added]\n\nBackward compatible: purely additive.\nCloses: {child-project-name} contribution (#{issue-number})"
+git push -u origin prop/PROP-{YYYY}-{NNN}-and-{NNN}
+```
+
+#### 3.5: Create the pull request
+
+1. Navigate to: `https://github.com/{owner}/{repo}/pull/new/prop/PROP-{YYYY}-{NNN}-and-{NNN}`
+2. Set **Base**: `main`
+3. Set **Compare**: `prop/PROP-{YYYY}-{NNN}-and-{NNN}`
+4. In the PR description, reference both proposals and summarize:
+   - What problem each solves
+   - Key validation data
+   - Backward compatibility status
+5. Submit the PR
+
+#### Notes
+
+- Your child project stays as a **separate repository** — it does NOT need to be forked
+- The PR contains the **implementation changes**, not your child project's code
+- Proposal files in `proposals/pending/` are **read-only documentation** — they describe what to merge
+- After merging, the maintainer moves your proposal from `pending/` to `accepted/` and credits you in `CONTRIBUTIONS.md`
 
 ### Step 4: Review
 
