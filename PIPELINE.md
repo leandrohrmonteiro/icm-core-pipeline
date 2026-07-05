@@ -2,6 +2,41 @@
 
 > This file defines the state machine for ICM execution. Read this once during ORIENT to understand the full pipeline topology.
 
+## Architecture: Two-Layer Design
+
+ICM operates in two layers to separate protocol from implementation:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ICM Core (Harness-Agnostic)                                           │
+│  ─────────────────────────────                                         │
+│  • Stage topology (discover → compile → format)                        │
+│  • State management (state.md, gates, handoffs)                        │
+│  • File-based context management                                       │
+│  • Stress-tested via child projects                                    │
+│                                                                         │
+│  Manages **what** gets presented to the model (files, stages, state).   │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Agent Integrations (Plug-in Layer)                                    │
+│  ─────────────────────────────────────                                 │
+│  • Pi integration: compaction hooks, token monitoring                   │
+│  • Claude Code integration: (future)                                   │
+│  • Other agents: (future)                                              │
+│                                                                         │
+│  Handles **how** each harness manages context overflow (API, tokens).   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Design Principle
+
+> ICM's core is harness-agnostic — it defines the protocol.
+> Agent integrations are plug-ins that know about specific agents.
+> The user picks an agent; ICM integrates with it automatically.
+> The user should never need to know token counts.
+
 ## Stage Topology
 
 ```

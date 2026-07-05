@@ -6,6 +6,8 @@
 
 You should consider submitting a contribution when, during your project's execution, you encounter:
 
+- A **new agent integration** that could benefit other projects (e.g., "add Claude Code integration")
+
 - A **gap** in the current ICM template that caused confusion, failure, or extra work
 - A **new stage pattern** that proved valuable and could benefit other projects
 - An **error recovery strategy** that others might find useful

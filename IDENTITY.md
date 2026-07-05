@@ -51,6 +51,40 @@ Projects may select a complexity track that governs depth:
 
 Default track: `standard`. Override per-project in clone.
 
+## Architecture: Two-Layer Design
+
+ICM operates in two layers:
+
+### Layer 1: ICM Core (Harness-Agnostic)
+
+The protocol layer — defines **what** gets done:
+- Stage topology (discover → compile → format)
+- State management (state.md, gates, handoffs)
+- File-based context management
+- Severity tracks (lean/standard/rigorous)
+
+This layer knows nothing about specific AI agents. It's the abstract blueprint.
+
+### Layer 2: Agent Integrations (Plug-in)
+
+The implementation layer — defines **how** each harness manages context:
+- Context window size (discovered or configured)
+- Compaction strategies (e.g., Pi's automatic compaction)
+- Token monitoring and overflow prevention
+- Agent-specific configuration (e.g., Pi's `ctx.compact()`)
+
+**Example**: Pi integration handles compaction hooks, token monitoring, and session management via Pi's SDK.
+
+### How Users Interact
+
+1. User clones ICM core
+2. User picks an agent (e.g., Pi)
+3. ICM loads the corresponding integration (if available)
+4. Integration handles agent-specific context management
+5. ICM core runs the pipeline (stages, gates, state)
+
+The user should never need to know token counts — the integration handles it.
+
 ## Self-Evolution Policy
 
 ICM is designed to improve through its child projects' real-world executions.
@@ -63,3 +97,5 @@ When a child project discovers something that could strengthen the ICM framework
 4. If rejected/deferred: documented in `proposals/` with rationale
 
 **No contribution is too small.** Even a single project's error recovery insight can save dozens of future projects from the same pitfall.
+
+**New**: Integration proposals (e.g., "add Claude Code integration") follow the same process — tested via child project stress testing, then merged into the next version.
